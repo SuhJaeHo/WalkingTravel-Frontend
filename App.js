@@ -1,12 +1,8 @@
 import React from "react";
-import { View, Text } from "react-native";
+import Router from "./src/navigation/router";
 
 const App = () => {
-  return (
-    <View>
-      <Text>test</Text>
-    </View>
-  );
+  return <Router />;
 };
 
 export default App;
