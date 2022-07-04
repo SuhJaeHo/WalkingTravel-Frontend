@@ -11,7 +11,9 @@ export default function LoginScreen({ navigation }) {
   useEffect(() => {
     googleSiginConfigure();
 
-    auth().onAuthStateChanged(onAuthStateChanged);
+    if (!checkIsLoggedIn()) {
+      auth().onAuthStateChanged(onAuthStateChanged);
+    }
   }, []);
 
   const googleSiginConfigure = () => {
@@ -34,6 +36,15 @@ export default function LoginScreen({ navigation }) {
         navigation.navigate("Main");
       }
     }
+  };
+
+  const checkIsLoggedIn = () => {
+    if (auth().currentUser) {
+      navigation.navigate("Main");
+      return true;
+    }
+
+    return false;
   };
 
   const handleGoogleLoginButtonPress = async () => {

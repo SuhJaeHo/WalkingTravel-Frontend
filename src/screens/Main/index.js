@@ -1,10 +1,12 @@
 import React from "react";
 import { View, Text } from "react-native";
 
+import GoogleMap from "../../components/GoogleMap";
+
 export default function MainScreen() {
   return (
     <View>
-      <Text>메인화면</Text>
+      <GoogleMap />
     </View>
   );
 }
