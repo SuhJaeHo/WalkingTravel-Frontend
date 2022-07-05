@@ -1,12 +1,14 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { View } from "react-native";
 
 import GoogleMap from "../../components/GoogleMap";
+import SearchLocationBar from "../../components/SearchLocationBar";
 
-export default function MainScreen() {
+export default function MainScreen({ route, navigation }) {
   return (
     <View>
-      <GoogleMap />
+      <GoogleMap params={route.params} />
+      <SearchLocationBar navigation={navigation} />
     </View>
   );
 }
