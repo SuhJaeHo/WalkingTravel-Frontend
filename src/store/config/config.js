@@ -1,8 +1,10 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
-import region from "../slices/regionSlice";
+import user from "../slices/userSlice";
+import destination from "../slices/destinationSlice";
 
 const rootReducer = combineReducers({
-  region,
+  user,
+  destination,
 });
 
 const store = configureStore({
