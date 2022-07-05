@@ -7,7 +7,12 @@ import auth from "@react-native-firebase/auth";
 import axios from "axios";
 import Config from "react-native-config";
 
+import { useDispatch } from "react-redux";
+import { addUid } from "../../store/slices/userSlice";
+
 export default function LoginScreen({ navigation }) {
+  const dispatch = useDispatch();
+
   useEffect(() => {
     googleSiginConfigure();
 
@@ -33,6 +38,9 @@ export default function LoginScreen({ navigation }) {
       });
 
       if (res.data.message === "success") {
+        const uid = auth().currentUser.uid;
+        dispatch(addUid(uid));
+
         navigation.navigate("Main");
       }
     }
@@ -40,6 +48,9 @@ export default function LoginScreen({ navigation }) {
 
   const checkIsLoggedIn = () => {
     if (auth().currentUser) {
+      const uid = auth().currentUser.uid;
+      dispatch(addUid(uid));
+
       navigation.navigate("Main");
       return true;
     }

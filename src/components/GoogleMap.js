@@ -1,15 +1,17 @@
 import React, { useEffect } from "react";
 import { StyleSheet, Dimensions } from "react-native";
 
-import MapView from "react-native-maps";
+import MapView, { Marker } from "react-native-maps";
 import GeoLocation from "react-native-geolocation-service";
 import GeoLocationAPI from "../api/GeoLocationAPI";
 
 import { useDispatch, useSelector } from "react-redux";
 
-export default function GoogleMap() {
+export default function GoogleMap({ params }) {
   const dispatch = useDispatch();
-  const region = useSelector(state => state.region.region);
+
+  const currentPosition = useSelector(state => state.user.currentPosition);
+  const destination = useSelector(state => state.destination.destination);
 
   useEffect(() => {
     const watchId = GeoLocationAPI(dispatch);
@@ -19,7 +21,18 @@ export default function GoogleMap() {
     };
   }, []);
 
-  return <MapView style={styles.map} region={region} showsUserLocation={true} showsMyLocationButton={true}></MapView>;
+  return (
+    <MapView
+      style={styles.map}
+      region={params ? destination.region : currentPosition}
+      showsUserLocation={true}
+      showsMyLocationButton={true}
+    >
+      {destination.photoURL !== "" && (
+        <Marker coordinate={destination.region} />
+      )}
+    </MapView>
+  );
 }
 
 const styles = StyleSheet.create({
