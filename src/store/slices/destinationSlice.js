@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   destination: {
+    placeName: "",
     region: {},
     distance: 0,
     photoURL: "",
