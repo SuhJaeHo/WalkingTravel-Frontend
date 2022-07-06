@@ -16,11 +16,15 @@ export default async function PlaceDetailsAPI(placeId) {
       longitudeDelta: 0.0121,
     };
 
-    const photoURL = `https://maps.googleapis.com/maps/api/place/photo?photo_reference=${response.data.result.photos[0].photo_reference}&key=${Config.GOOGLE_API_KEY}`;
+    let photoURL = null;
+
+    if (response.data.result.photos) {
+      photoURL = `https://maps.googleapis.com/maps/api/place/photo?maxheight=1600&maxWidth=1600&photo_reference=${response.data.result.photos[0].photo_reference}&key=${Config.GOOGLE_API_KEY}`;
+    }
 
     return { message: "success", region, photoURL };
   } catch (error) {
-    console.log(error);
+    console.warn(error);
     return { message: "fail" };
   }
 }

@@ -13,6 +13,7 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 
 import { useSelector, useDispatch } from "react-redux";
 import { updateDestination } from "../../store/slices/destinationSlice";
+import { updateSheetState } from "../../store/slices/sheetSlice";
 
 import PlaceAutoCompleteAPI from "../../api/PlaceAutoCompleteAPI";
 import PlaceDetailsAPI from "../../api/PlaceDetailsAPI";
@@ -33,17 +34,18 @@ export default function SearchLocationScreen({ navigation }) {
     setSearchResult(searchResult.predictions);
   };
 
-  const handleSearchListPress = async (placeName, placeId, distance) => {
+  const handlePressSearchList = async (placeName, placeId, distance) => {
     const { message, region, photoURL } = await PlaceDetailsAPI(placeId);
 
     if (message === "success") {
       dispatch(updateDestination({ placeName, region, photoURL, distance }));
+      dispatch(updateSheetState());
 
       navigation.navigate("Main", { selected: true });
     }
   };
 
-  const handleBackButtonPress = () => {
+  const handlePressBackButton = () => {
     navigation.navigate("Main");
   };
 
@@ -56,7 +58,7 @@ export default function SearchLocationScreen({ navigation }) {
       <Pressable
         style={styles.searchListContainer}
         onPress={() =>
-          handleSearchListPress(
+          handlePressSearchList(
             structured_formatting.main_text,
             place_id,
             distance
@@ -81,7 +83,7 @@ export default function SearchLocationScreen({ navigation }) {
   return (
     <View>
       <View style={styles.searchInputContainer}>
-        <Pressable onPress={handleBackButtonPress}>
+        <Pressable onPress={handlePressBackButton}>
           <Ionicons name={"chevron-back-sharp"} size={30} color={"black"} />
         </Pressable>
         <TextInput
