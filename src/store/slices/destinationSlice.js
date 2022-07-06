@@ -2,14 +2,14 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   destination: {
-    placeName: "",
+    placeName: "Location Search",
     region: {},
     distance: 0,
     photoURL: "",
   },
 };
 
-const regionSlice = createSlice({
+const destinationSlice = createSlice({
   name: "destination",
   initialState,
   reducers: {
@@ -19,6 +19,6 @@ const regionSlice = createSlice({
   },
 });
 
-export const { updateDestination } = regionSlice.actions;
+export const { updateDestination } = destinationSlice.actions;
 
-export default regionSlice.reducer;
+export default destinationSlice.reducer;
