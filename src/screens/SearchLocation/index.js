@@ -6,7 +6,10 @@ import {
   TextInput,
   Pressable,
   FlatList,
+  Dimensions,
 } from "react-native";
+
+import Ionicons from "react-native-vector-icons/Ionicons";
 
 import { useSelector, useDispatch } from "react-redux";
 import { updateDestination } from "../../store/slices/destinationSlice";
@@ -30,27 +33,38 @@ export default function SearchLocationScreen({ navigation }) {
     setSearchResult(searchResult.predictions);
   };
 
-  const handleSearchListPress = async (placeId, distance) => {
+  const handleSearchListPress = async (placeName, placeId, distance) => {
     const { message, region, photoURL } = await PlaceDetailsAPI(placeId);
 
     if (message === "success") {
-      dispatch(updateDestination({ region, photoURL, distance }));
+      dispatch(updateDestination({ placeName, region, photoURL, distance }));
 
       navigation.navigate("Main", { selected: true });
     }
   };
 
+  const handleBackButtonPress = () => {
+    navigation.navigate("Main");
+  };
+
   const renderItem = ({ item }) => {
-    const { description, distance_meters, place_id } = item;
+    const { structured_formatting, distance_meters, place_id } = item;
 
     const distance = getKilometers(distance_meters);
 
     return (
       <Pressable
-        style={styles.searchResultContainer}
-        onPress={() => handleSearchListPress(place_id, distance)}
+        style={styles.searchListContainer}
+        onPress={() =>
+          handleSearchListPress(
+            structured_formatting.main_text,
+            place_id,
+            distance
+          )
+        }
       >
-        <Text>{description}</Text>
+        <Ionicons name={"location-sharp"} size={30} />
+        <Text>{structured_formatting.main_text}</Text>
         <Text>{distance}</Text>
       </Pressable>
     );
@@ -61,20 +75,21 @@ export default function SearchLocationScreen({ navigation }) {
   };
 
   const renderListEmpty = () => {
-    return (
-      <View>
-        <Text>Not Search</Text>
-      </View>
-    );
+    return <Text>Not Search</Text>;
   };
 
   return (
     <View>
-      <TextInput
-        placeholder="Search Location"
-        onChangeText={handleInputTextChange}
-        value={inputText}
-      />
+      <View style={styles.searchInputContainer}>
+        <Pressable onPress={handleBackButtonPress}>
+          <Ionicons name={"chevron-back-sharp"} size={30} color={"black"} />
+        </Pressable>
+        <TextInput
+          placeholder="Search Location"
+          onChangeText={handleInputTextChange}
+          value={inputText}
+        />
+      </View>
       <FlatList
         data={searchResult}
         renderItem={renderItem}
@@ -87,7 +102,11 @@ export default function SearchLocationScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  searchResultContainer: {
+  searchInputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  searchListContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
   },
