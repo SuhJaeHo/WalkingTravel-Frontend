@@ -1,8 +1,14 @@
 import React, { useEffect, useRef } from "react";
-import { View, Text, Image, Dimensions } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  Image,
+  Dimensions,
+  Pressable,
+} from "react-native";
 
 import BottomSheet from "reanimated-bottom-sheet";
-import Animated from "react-native-reanimated";
 
 import { useSelector } from "react-redux";
 
@@ -18,23 +24,18 @@ export default function ViewDestination() {
 
   const renderContent = () => {
     return (
-      <View
-        style={{
-          height: "100%",
-          backgroundColor: "#fff",
-        }}
-      >
+      <View style={styles.container}>
         {destination.photoURL && (
           <Image
             source={{ uri: destination.photoURL }}
-            style={{
-              width: "100%",
-              height: "50%",
-            }}
+            style={styles.imageContainer}
           />
         )}
         <Text>{destination.placeName}</Text>
         <Text>{destination.distance}</Text>
+        <Pressable style={styles.startBtn}>
+          <Text style={styles.startText}>시작</Text>
+        </Pressable>
       </View>
     );
   };
@@ -58,3 +59,24 @@ export default function ViewDestination() {
     />
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    height: "100%",
+    backgroundColor: "#fff",
+  },
+  imageContainer: {
+    width: "100%",
+    height: "50%",
+  },
+  startBtn: {
+    width: Dimensions.get("screen").width * 0.2,
+    height: Dimensions.get("screen").height * 0.1,
+    borderRadius: Dimensions.get("screen").height * 0.05,
+    backgroundColor: "blue",
+  },
+  startText: {
+    color: "#fff",
+    fontSize: 20,
+  },
+});
