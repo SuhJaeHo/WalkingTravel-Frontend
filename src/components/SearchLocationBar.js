@@ -19,13 +19,13 @@ export default function SearchLocationBar({ navigation }) {
 
 const styles = StyleSheet.create({
   searchBarContainer: {
-    width: Dimensions.get("window").width * 0.9,
+    width: Dimensions.get("window").width * 0.7,
     height: 50,
     borderRadius: 10,
     backgroundColor: "#fff",
     position: "absolute",
     top: 10,
-    left: Dimensions.get("window").width * 0.05,
+    left: Dimensions.get("window").width * 0.15,
     alignItems: "center",
     justifyContent: "center",
   },
