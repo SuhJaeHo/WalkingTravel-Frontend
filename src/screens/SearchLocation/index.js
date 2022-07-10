@@ -6,14 +6,13 @@ import {
   TextInput,
   Pressable,
   FlatList,
-  Dimensions,
 } from "react-native";
 
 import Ionicons from "react-native-vector-icons/Ionicons";
 
 import { useSelector, useDispatch } from "react-redux";
 import { updateDestination } from "../../store/slices/destinationSlice";
-import { updateSheetState } from "../../store/slices/sheetSlice";
+import { updateSheetState } from "../../store/slices/bottomSheetSlice";
 
 import PlaceAutoCompleteAPI from "../../api/PlaceAutoCompleteAPI";
 import PlaceDetailsAPI from "../../api/PlaceDetailsAPI";
@@ -25,12 +24,12 @@ export default function SearchLocationScreen({ navigation }) {
   const [searchResult, setSearchResult] = useState("");
 
   const dispatch = useDispatch();
-  const currentPosition = useSelector(state => state.user.currentPosition);
+  const currentRegion = useSelector(state => state.user.currentRegion);
 
   const handleInputTextChange = async text => {
     setInputText(text);
 
-    const searchResult = await PlaceAutoCompleteAPI(text, currentPosition);
+    const searchResult = await PlaceAutoCompleteAPI(text, currentRegion);
     setSearchResult(searchResult.predictions);
   };
 
