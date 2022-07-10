@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Dimensions } from "react-native";
 
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker, Polyline } from "react-native-maps";
 import GeoLocation from "react-native-geolocation-service";
 import GeoLocationAPI from "../api/GeoLocationAPI";
 
@@ -14,7 +14,7 @@ import {
 } from "react-native-sensors";
 
 import { useDispatch, useSelector } from "react-redux";
-import { updateSheetState } from "../store/slices/sheetSlice";
+import { updateSheetState } from "../store/slices/bottomSheetSlice";
 
 import { LogBox } from "react-native";
 
@@ -24,9 +24,13 @@ export default function GoogleMap({ params }) {
 
   const dispatch = useDispatch();
 
-  const currentPosition = useSelector(state => state.user.currentPosition);
+  const currentRegion = useSelector(state => state.user.currentRegion);
   const destination = useSelector(state => state.destination.destination);
-  const isBottomSheetOpen = useSelector(state => state.sheet.isBottomSheetOpen);
+  const isBottomSheetOpen = useSelector(
+    state => state.bottomSheet.isBottomSheetOpen
+  );
+
+  console.log(destination.points);
 
   useEffect(() => {
     LogBox.ignoreLogs(["new NativeEventEmitter"]);
@@ -67,7 +71,7 @@ export default function GoogleMap({ params }) {
   ) : (
     <MapView
       style={isBottomSheetOpen ? styles.sheetOpenMap : styles.map}
-      region={params || isMarkerPressed ? destination.region : currentPosition}
+      region={params || isMarkerPressed ? destination.region : currentRegion}
       showsUserLocation={true}
       showsMyLocationButton={true}
       onPress={() => handlePressMapView()}
@@ -76,6 +80,13 @@ export default function GoogleMap({ params }) {
         <Marker
           coordinate={destination.region}
           onPress={() => handlePressMarker()}
+        />
+      )}
+      {destination.isGuideStart && (
+        <Polyline
+          coordinates={[...destination.routes]}
+          strokeColor="pink"
+          strokeWidth={6}
         />
       )}
     </MapView>

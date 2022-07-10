@@ -4,8 +4,8 @@ const initialState = {
   isBottomSheetOpen: false,
 };
 
-const sheetSlice = createSlice({
-  name: "sheet",
+const bottomSheetSlice = createSlice({
+  name: "bottomSheet",
   initialState,
   reducers: {
     updateSheetState(state) {
@@ -14,6 +14,6 @@ const sheetSlice = createSlice({
   },
 });
 
-export const { updateSheetState } = sheetSlice.actions;
+export const { updateSheetState } = bottomSheetSlice.actions;
 
-export default sheetSlice.reducer;
+export default bottomSheetSlice.reducer;

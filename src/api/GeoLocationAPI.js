@@ -1,22 +1,32 @@
 import GeoLocation from "react-native-geolocation-service";
 import { PermissionsAndroid } from "react-native";
 
-import { updateCurrentPosition } from "../store/slices/userSlice";
+import GeocodeAPI from "./GeocodeAPI";
+
+import { updateCurrentPoint } from "../store/slices/userSlice";
 
 export default function GeoLocationAPI(dispatch) {
   const getCurrentLocation = () => {
     let currentPosition = null;
 
     GeoLocation.getCurrentPosition(
-      position => {
+      async position => {
         currentPosition = position;
 
+        const placeName = await GeocodeAPI(
+          position.coords.latitude,
+          position.coords.longitude
+        );
+
         dispatch(
-          updateCurrentPosition({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-            latitudeDelta: 0.015,
-            longitudeDelta: 0.0121,
+          updateCurrentPoint({
+            currentRegion: {
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+              latitudeDelta: 0.015,
+              longitudeDelta: 0.0121,
+            },
+            placeName,
           })
         );
       },
@@ -29,17 +39,25 @@ export default function GeoLocationAPI(dispatch) {
     );
 
     return GeoLocation.watchPosition(
-      position => {
+      async position => {
         if (
           currentPosition &&
           currentPosition.coords.latitude !== position.coords.latitude
         ) {
+          const placeName = await GeocodeAPI(
+            position.coords.latitude,
+            position.coords.longitude
+          );
+
           dispatch(
-            updateCurrentPosition({
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude,
-              latitudeDelta: 0.015,
-              longitudeDelta: 0.0121,
+            updateCurrentPoint({
+              currentRegion: {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+                latitudeDelta: 0.015,
+                longitudeDelta: 0.0121,
+              },
+              placeName,
             })
           );
         }
