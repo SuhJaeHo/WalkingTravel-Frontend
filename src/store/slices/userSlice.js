@@ -2,12 +2,13 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   uid: "",
-  currentPosition: {
+  currentRegion: {
     latitude: 37.497,
     longitude: 127.0254,
     latitudeDelta: 0.015,
     longitudeDelta: 0.0121,
   },
+  placeName: "",
 };
 
 const userSlice = createSlice({
@@ -17,12 +18,15 @@ const userSlice = createSlice({
     addUid(state, action) {
       state.uid = action.payload;
     },
-    updateCurrentPosition(state, action) {
-      state.currentPosition = action.payload;
+    updateCurrentPoint(state, action) {
+      const { currentRegion, placeName } = action.payload;
+
+      state.currentRegion = currentRegion;
+      state.placeName = placeName;
     },
   },
 });
 
-export const { addUid, updateCurrentPosition } = userSlice.actions;
+export const { addUid, updateCurrentPoint } = userSlice.actions;
 
 export default userSlice.reducer;

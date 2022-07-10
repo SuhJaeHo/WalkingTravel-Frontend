@@ -10,11 +10,21 @@ import {
 
 import BottomSheet from "reanimated-bottom-sheet";
 
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { startGuide } from "../store/slices/destinationSlice";
+import { updateSheetState } from "../store/slices/bottomSheetSlice";
+
+import DirectionsAPI from "../api/DirectionsAPI";
 
 export default function ViewDestination() {
+  const dispatch = useDispatch();
+
+  const currentRegion = useSelector(state => state.user.currentRegion);
+  const currentPlaceName = useSelector(state => state.user.placeName);
   const destination = useSelector(state => state.destination.destination);
-  const isBottomSheetOpen = useSelector(state => state.sheet.isBottomSheetOpen);
+  const isBottomSheetOpen = useSelector(
+    state => state.bottomSheet.isBottomSheetOpen
+  );
 
   const bottomSheefRef = useRef(null);
 
@@ -33,7 +43,7 @@ export default function ViewDestination() {
         )}
         <Text>{destination.placeName}</Text>
         <Text>{destination.distance}</Text>
-        <Pressable style={styles.startBtn}>
+        <Pressable style={styles.startBtn} onPress={startDirectionGuide}>
           <Text style={styles.startText}>시작</Text>
         </Pressable>
       </View>
@@ -46,6 +56,17 @@ export default function ViewDestination() {
     }
 
     bottomSheefRef.current.snapTo(1);
+  };
+
+  const startDirectionGuide = async () => {
+    const { points, routes } = await DirectionsAPI(
+      currentRegion,
+      currentPlaceName,
+      destination
+    );
+
+    dispatch(startGuide({ points, routes }));
+    dispatch(updateSheetState());
   };
 
   return (

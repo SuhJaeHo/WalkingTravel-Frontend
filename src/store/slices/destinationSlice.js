@@ -6,6 +6,9 @@ const initialState = {
     region: {},
     distance: 0,
     photoURL: "",
+    points: [],
+    routes: [],
+    isGuideStart: false,
   },
 };
 
@@ -16,9 +19,16 @@ const destinationSlice = createSlice({
     updateDestination(state, action) {
       state.destination = action.payload;
     },
+    startGuide(state, action) {
+      const { points, routes } = action.payload;
+
+      state.destination.points = points;
+      state.destination.routes = routes;
+      state.destination.isGuideStart = true;
+    },
   },
 });
 
-export const { updateDestination } = destinationSlice.actions;
+export const { updateDestination, startGuide } = destinationSlice.actions;
 
 export default destinationSlice.reducer;
