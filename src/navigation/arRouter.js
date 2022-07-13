@@ -1,15 +1,32 @@
-import React from "react";
+import React, { useState } from "react";
 
-import { ViroARScene, ViroText } from "@viro-community/react-viro";
+import { ViroARScene, ViroImage } from "@viro-community/react-viro";
 import { ViroARSceneNavigator } from "@viro-community/react-viro";
 
-const initialScene = () => {
+import { useSelector } from "react-redux";
+
+import { getArrow, getRotation } from "../utils/utils";
+
+const GuideScene = () => {
+  const [rotation, setRotation] = useState([0, 0, 0]);
+
+  const isNear = useSelector(state => state.destination.destination.isNear);
+  const bearings = useSelector(state => state.destination.destination.bearings);
+
+  const rotateArrow = () => {
+    const arrow = isNear ? getArrow(bearings[0], bearings[1]) : getArrow(bearings[0], bearings[0]);
+    setRotation(getRotation(arrow));
+  };
+
   return (
     <ViroARScene>
-      <ViroText
-        text={"Hello AR"}
-        scale={[0.5, 0.5, 0.5]}
+      <ViroImage
+        source={require("../assets/arrow.png")}
+        width={2}
+        height={2}
         position={[0, 0, -5]}
+        rotation={rotation}
+        onLoadEnd={() => rotateArrow()}
       />
     </ViroARScene>
   );
@@ -20,7 +37,7 @@ export default function ARRouter() {
     <ViroARSceneNavigator
       style={{ flex: 1 }}
       initialScene={{
-        scene: initialScene,
+        scene: GuideScene,
       }}
     />
   );
