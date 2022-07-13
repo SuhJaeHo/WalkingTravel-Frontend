@@ -40,7 +40,7 @@ export const getDistance = (currRegion, nextRegion) => {
 };
 
 export const getArrow = (compassHeading, bearing) => {
-  if (Math.abs(compassHeading - bearing) < 20) return "straight";
+  if (Math.abs(compassHeading - bearing) < 10) return "straight";
 
   if (Math.abs(compassHeading - bearing) > 170 && Math.abs(compassHeading - bearing) < 190) return "back";
 

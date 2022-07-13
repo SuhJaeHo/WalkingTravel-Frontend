@@ -93,7 +93,7 @@ export default function GoogleMap() {
           onPress={() => handlePressMapView()}
         >
           {destination.photoURL !== "" && <Marker coordinate={destination.region} onPress={() => handlePressMarker()} />}
-          {destination.isGuideStart && <Polyline coordinates={[destination.points[6], destination.points[7]]} strokeColor="pink" strokeWidth={6} />}
+          {destination.isGuideStart && <Polyline coordinates={[...destination.points]} strokeColor="pink" strokeWidth={6} />}
         </MapView>
       )}
     </>
