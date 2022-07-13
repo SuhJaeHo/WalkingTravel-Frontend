@@ -1,17 +1,10 @@
 import React, { useEffect, useRef } from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  Image,
-  Dimensions,
-  Pressable,
-} from "react-native";
+import { StyleSheet, View, Text, Image, Dimensions, Pressable } from "react-native";
 
 import BottomSheet from "reanimated-bottom-sheet";
 
 import { useDispatch, useSelector } from "react-redux";
-import { startGuide } from "../store/slices/destinationSlice";
+import { startGuide, endGuide } from "../store/slices/destinationSlice";
 import { updateSheetState } from "../store/slices/bottomSheetSlice";
 
 import DirectionsAPI from "../api/DirectionsAPI";
@@ -22,9 +15,7 @@ export default function ViewDestination() {
   const currentRegion = useSelector(state => state.user.currentRegion);
   const currentPlaceName = useSelector(state => state.user.placeName);
   const destination = useSelector(state => state.destination.destination);
-  const isBottomSheetOpen = useSelector(
-    state => state.bottomSheet.isBottomSheetOpen
-  );
+  const isBottomSheetOpen = useSelector(state => state.bottomSheet.isBottomSheetOpen);
 
   const bottomSheefRef = useRef(null);
 
@@ -35,17 +26,18 @@ export default function ViewDestination() {
   const renderContent = () => {
     return (
       <View style={styles.container}>
-        {destination.photoURL && (
-          <Image
-            source={{ uri: destination.photoURL }}
-            style={styles.imageContainer}
-          />
-        )}
+        {destination.photoURL && <Image source={{ uri: destination.photoURL }} style={styles.imageContainer} />}
         <Text>{destination.placeName}</Text>
         <Text>{destination.distance}</Text>
-        <Pressable style={styles.startBtn} onPress={startDirectionGuide}>
-          <Text style={styles.startText}>시작</Text>
-        </Pressable>
+        {!destination.isGuideStart ? (
+          <Pressable style={styles.guideBtn} onPress={handlePressGuideButton}>
+            <Text style={styles.guideText}>시작</Text>
+          </Pressable>
+        ) : (
+          <Pressable style={styles.guideBtn} onPress={handlePressGuideButton}>
+            <Text style={styles.guideText}>종료</Text>
+          </Pressable>
+        )}
       </View>
     );
   };
@@ -58,14 +50,14 @@ export default function ViewDestination() {
     bottomSheefRef.current.snapTo(1);
   };
 
-  const startDirectionGuide = async () => {
-    const { points, routes } = await DirectionsAPI(
-      currentRegion,
-      currentPlaceName,
-      destination
-    );
+  const handlePressGuideButton = async () => {
+    if (destination.isGuideStart) {
+      return dispatch(endGuide());
+    }
 
-    dispatch(startGuide({ points, routes }));
+    const { points, routes, bearings } = await DirectionsAPI(currentRegion, currentPlaceName, destination);
+
+    dispatch(startGuide({ points, routes, bearings }));
     dispatch(updateSheetState());
   };
 
@@ -90,13 +82,13 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "50%",
   },
-  startBtn: {
+  guideBtn: {
     width: Dimensions.get("screen").width * 0.2,
     height: Dimensions.get("screen").height * 0.1,
     borderRadius: Dimensions.get("screen").height * 0.05,
     backgroundColor: "blue",
   },
-  startText: {
+  guideText: {
     color: "#fff",
     fontSize: 20,
   },

@@ -8,6 +8,8 @@ const initialState = {
     photoURL: "",
     points: [],
     routes: [],
+    bearings: [],
+    isNear: false,
     isGuideStart: false,
   },
 };
@@ -17,18 +19,34 @@ const destinationSlice = createSlice({
   initialState,
   reducers: {
     updateDestination(state, action) {
-      state.destination = action.payload;
+      const { placeName, region, photoURL, distance } = action.payload;
+
+      state.destination.placeName = placeName;
+      state.destination.region = region;
+      state.destination.photoURL = photoURL;
+      state.destination.distance = distance;
     },
     startGuide(state, action) {
-      const { points, routes } = action.payload;
+      const { points, routes, bearings } = action.payload;
 
       state.destination.points = points;
       state.destination.routes = routes;
+      state.destination.bearings = bearings;
       state.destination.isGuideStart = true;
+    },
+    endGuide(state) {
+      state.destination.isGuideStart = false;
+    },
+    updatePoint(state) {
+      state.destination.points.shift();
+      state.destination.isNear = false;
+    },
+    updateNearStatus(state) {
+      state.destination.isNear = true;
     },
   },
 });
 
-export const { updateDestination, startGuide } = destinationSlice.actions;
+export const { updateDestination, startGuide, endGuide, updatePoint, updateNearStatus } = destinationSlice.actions;
 
 export default destinationSlice.reducer;
