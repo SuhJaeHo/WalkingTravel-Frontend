@@ -1,11 +1,9 @@
 import axios from "axios";
 import Config from "react-native-config";
 
-export default async function DirectionsAPI(
-  currentRegion,
-  currentPlaceName,
-  destination
-) {
+import { getAngle } from "../utils/utils";
+
+export default async function DirectionsAPI(currentRegion, currentPlaceName, destination) {
   try {
     const response = await axios.post(
       "https://apis.openapi.sk.com/tmap/routes/pedestrian?version=1",
@@ -26,31 +24,30 @@ export default async function DirectionsAPI(
       }
     );
 
+    const steps = response.data.features;
+
     const points = [];
     const routes = [];
-
-    const steps = response.data.features;
-    console.log(steps);
+    const bearings = [];
 
     steps.forEach(step => {
-      console.log(step.geometry.coordinates);
-
       if (step.geometry.type === "Point") {
-        points.push({
-          latitude: step.geometry.coordinates[1],
-          longitude: step.geometry.coordinates[0],
-        });
-      } else {
-        step.geometry.coordinates.forEach(coordinate => {
-          routes.push({
-            latitude: coordinate[1],
-            longitude: coordinate[0],
-          });
-        });
+        points.push({ latitude: step.geometry.coordinates[1], longitude: step.geometry.coordinates[0] });
+        return;
       }
+
+      step.geometry.coordinates.forEach(coordinate => {
+        routes.push({ latitude: coordinate[1], longitude: coordinate[0] });
+      });
     });
 
-    return { points, routes };
+    for (let i = 0; i < points.length; i++) {
+      if (i < points.length - 1) {
+        bearings.push(getAngle(points[i], points[i + 1]));
+      }
+    }
+
+    return { points, routes, bearings };
   } catch (error) {
     console.log(error);
   }

@@ -1,12 +1,5 @@
 import React, { useState } from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  TextInput,
-  Pressable,
-  FlatList,
-} from "react-native";
+import { StyleSheet, View, Text, TextInput, Pressable, FlatList } from "react-native";
 
 import Ionicons from "react-native-vector-icons/Ionicons";
 
@@ -40,7 +33,7 @@ export default function SearchLocationScreen({ navigation }) {
       dispatch(updateDestination({ placeName, region, photoURL, distance }));
       dispatch(updateSheetState());
 
-      navigation.navigate("Main", { selected: true });
+      navigation.navigate("Main");
     }
   };
 
@@ -54,16 +47,7 @@ export default function SearchLocationScreen({ navigation }) {
     const distance = getKilometers(distance_meters);
 
     return (
-      <Pressable
-        style={styles.searchListContainer}
-        onPress={() =>
-          handlePressSearchList(
-            structured_formatting.main_text,
-            place_id,
-            distance
-          )
-        }
-      >
+      <Pressable style={styles.searchListContainer} onPress={() => handlePressSearchList(structured_formatting.main_text, place_id, distance)}>
         <Ionicons name={"location-sharp"} size={30} />
         <Text>{structured_formatting.main_text}</Text>
         <Text>{distance}</Text>
@@ -85,11 +69,7 @@ export default function SearchLocationScreen({ navigation }) {
         <Pressable onPress={handlePressBackButton}>
           <Ionicons name={"chevron-back-sharp"} size={30} color={"black"} />
         </Pressable>
-        <TextInput
-          placeholder="Search Location"
-          onChangeText={handleInputTextChange}
-          value={inputText}
-        />
+        <TextInput placeholder="Search Location" onChangeText={handleInputTextChange} value={inputText} />
       </View>
       <FlatList
         data={searchResult}

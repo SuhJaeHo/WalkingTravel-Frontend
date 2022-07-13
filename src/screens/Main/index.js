@@ -6,10 +6,10 @@ import SearchLocationBar from "../../components/SearchLocationBar";
 
 import ViewDestination from "../../components/ViewDestination";
 
-export default function MainScreen({ route, navigation }) {
+export default function MainScreen({ navigation }) {
   return (
     <View style={styles.container}>
-      <GoogleMap params={route.params} />
+      <GoogleMap />
       <SearchLocationBar navigation={navigation} />
       <ViewDestination />
     </View>
