@@ -16,7 +16,11 @@ export default function LoginScreen({ navigation }) {
   useEffect(() => {
     googleSiginConfigure();
 
-    if (!checkIsLoggedIn()) {
+    if (checkIsLoggedIn) {
+      navigation.navigate("Main");
+    }
+
+    if (!checkIsLoggedIn) {
       auth().onAuthStateChanged(onAuthStateChanged);
     }
   }, []);
