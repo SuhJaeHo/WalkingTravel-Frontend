@@ -1,7 +1,7 @@
 import axios from "axios";
 import Config from "react-native-config";
 
-import { getAngle } from "../utils/utils";
+import { getBearing, getRoutesFromSteps, getBearingsFromRoutes, modifySimilarBearingsToSame, deleteUselessPoint } from "../utils/utils";
 
 export default async function DirectionsAPI(currentRegion, currentPlaceName, destination) {
   try {
@@ -26,28 +26,18 @@ export default async function DirectionsAPI(currentRegion, currentPlaceName, des
 
     const steps = response.data.features;
 
-    const points = [];
     const routes = [];
     const bearings = [];
 
-    steps.forEach(step => {
-      if (step.geometry.type === "Point") {
-        points.push({ latitude: step.geometry.coordinates[1], longitude: step.geometry.coordinates[0] });
-        return;
-      }
+    getRoutesFromSteps(steps, routes);
 
-      step.geometry.coordinates.forEach(coordinate => {
-        routes.push({ latitude: coordinate[1], longitude: coordinate[0] });
-      });
-    });
+    getBearingsFromRoutes(routes, bearings);
 
-    for (let i = 0; i < points.length; i++) {
-      if (i < points.length - 1) {
-        bearings.push(getAngle(points[i], points[i + 1]));
-      }
-    }
+    modifySimilarBearingsToSame(bearings);
 
-    return { points, routes, bearings };
+    deleteUselessPoint(routes, bearings);
+
+    return { routes, bearings };
   } catch (error) {
     console.log(error);
   }
