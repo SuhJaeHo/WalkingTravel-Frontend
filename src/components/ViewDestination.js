@@ -43,21 +43,17 @@ export default function ViewDestination() {
   };
 
   const controlBottomSheet = () => {
-    if (isBottomSheetOpen) {
-      return bottomSheefRef.current.snapTo(0);
-    }
+    if (isBottomSheetOpen) return bottomSheefRef.current.snapTo(0);
 
     bottomSheefRef.current.snapTo(1);
   };
 
   const handlePressGuideButton = async () => {
-    if (destination.isGuideStart) {
-      return dispatch(endGuide());
-    }
+    if (destination.isGuideStart) return dispatch(endGuide());
 
-    const { points, routes, bearings } = await DirectionsAPI(currentRegion, currentPlaceName, destination);
+    const { routes, bearings } = await DirectionsAPI(currentRegion, currentPlaceName, destination);
 
-    dispatch(startGuide({ points, routes, bearings }));
+    dispatch(startGuide({ routes, bearings }));
     dispatch(updateSheetState());
   };
 

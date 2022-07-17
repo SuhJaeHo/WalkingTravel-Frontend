@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { StyleSheet, Dimensions } from "react-native";
 
 import MapView, { Marker, Polyline } from "react-native-maps";
@@ -10,10 +10,10 @@ import ARRouter from "../navigation/arRouter";
 import { accelerometer, setUpdateIntervalForType, SensorTypes } from "react-native-sensors";
 
 import { useDispatch, useSelector } from "react-redux";
-import { updateNearStatus } from "../store/slices/destinationSlice";
+import { updateCurrentPointIndex } from "../store/slices/destinationSlice";
 import { updateSheetState } from "../store/slices/bottomSheetSlice";
 
-import { getDistance } from "../utils/utils";
+import { getNearPointIndex, getBearingFromNearPoint, getBearingFromBeforeRegion } from "../utils/utils";
 
 import { LogBox } from "react-native";
 
@@ -29,6 +29,7 @@ export default function GoogleMap() {
 
   const dispatch = useDispatch();
 
+  const beforeRegion = useSelector(state => state.user.beforeRegion);
   const currentRegion = useSelector(state => state.user.currentRegion);
   const destination = useSelector(state => state.destination.destination);
   const isBottomSheetOpen = useSelector(state => state.bottomSheet.isBottomSheetOpen);
@@ -47,21 +48,42 @@ export default function GoogleMap() {
 
   useEffect(() => {
     const subscription = accelerometer.subscribe(({ y }) => {
-      if (Math.abs(tilt - y) > 7) {
-        setTilt(y);
+      if (y > 0) {
+        if (Math.abs(tilt - y) > 7) {
+          setTilt(y);
 
-        subscription.unsubscribe();
+          subscription.unsubscribe();
+        }
       }
     });
   }, [tilt]);
 
   useEffect(() => {
-    if (destination.points.length !== 0) {
-      const curreRegion = { latitude: currentRegion.latitude, longitude: currentRegion.longitude };
+    if (destination.routes.length !== 0) {
+      const nearPointIndex = getNearPointIndex({ latitude: currentRegion.latitude, longitude: currentRegion.longitude }, destination.routes);
 
-      const distance = getDistance(curreRegion, destination.points[1]);
+      const nearPointRegion = destination.routes[nearPointIndex];
 
-      if (distance < 3) dispatch(updateNearStatus());
+      const bearingFromNearPoint = getBearingFromNearPoint(nearPointRegion, currentRegion);
+
+      const nearPointBearing = destination.bearings[nearPointIndex];
+
+      const bearingFromBeforeRegion = getBearingFromBeforeRegion(beforeRegion, currentRegion);
+
+      if (nearPointIndex !== 0) {
+        if (
+          Math.abs(nearPointBearing - bearingFromNearPoint) < 60 ||
+          Math.abs(bearingFromBeforeRegion - destination.routes[nearPointIndex]) -
+            Math.abs(bearingFromBeforeRegion - destination.routes[nearPointIndex - 1]) <
+            0
+        ) {
+          dispatch(updateCurrentPointIndex(nearPointIndex));
+        } else {
+          dispatch(updateCurrentPointIndex(nearPointIndex - 1));
+        }
+      } else {
+        dispatch(updateCurrentPointIndex(nearPointIndex));
+      }
     }
   }, [currentRegion]);
 
@@ -85,7 +107,7 @@ export default function GoogleMap() {
         <ARRouter />
       ) : (
         <MapView
-          style={isBottomSheetOpen ? styles.sheetOpenMap : tilt > 7 && destination.isGuideStart ? styles.arOpenMap : styles.map}
+          style={isBottomSheetOpen ? styles.sheetOpenMap : styles.map}
           region={isMarkerPressed ? destination.region : mapRegion}
           showsUserLocation={true}
           showsMyLocationButton={true}
@@ -93,7 +115,7 @@ export default function GoogleMap() {
           onPress={() => handlePressMapView()}
         >
           {destination.photoURL !== "" && <Marker coordinate={destination.region} onPress={() => handlePressMarker()} />}
-          {destination.isGuideStart && <Polyline coordinates={[...destination.points]} strokeColor="pink" strokeWidth={6} />}
+          {destination.isGuideStart && <Polyline coordinates={[...destination.routes]} strokeColor="blue" strokeWidth={6} lineDashPattern={[2, 2]} />}
         </MapView>
       )}
     </>

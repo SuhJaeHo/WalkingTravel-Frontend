@@ -1,20 +1,41 @@
 import React, { useState } from "react";
 
+import { StyleSheet } from "react-native";
+
 import { ViroARScene, ViroImage } from "@viro-community/react-viro";
 import { ViroARSceneNavigator } from "@viro-community/react-viro";
 
 import { useSelector } from "react-redux";
 
-import { getArrow, getRotation } from "../utils/utils";
+import { getArrow, getRotation, getDistance } from "../utils/utils";
 
 const GuideScene = () => {
   const [rotation, setRotation] = useState([0, 0, 0]);
 
-  const isNear = useSelector(state => state.destination.destination.isNear);
+  const routes = useSelector(state => state.destination.destination.routes);
   const bearings = useSelector(state => state.destination.destination.bearings);
+  const currentPointIndex = useSelector(state => state.destination.destination.currentPointIndex);
+  const currentRegion = useSelector(state => state.user.currentRegion);
 
   const rotateArrow = () => {
-    const arrow = isNear ? getArrow(bearings[0], bearings[1]) : getArrow(bearings[0], bearings[0]);
+    let arrow = getArrow(bearings[currentPointIndex], bearings[currentPointIndex + 1]);
+
+    if (bearings[currentPointIndex + 2]) {
+      if (
+        bearings[currentPointIndex] === bearings[currentPointIndex + 1] &&
+        getDistance(routes[currentPointIndex + 1], routes[currentPointIndex + 2]) < 10
+      ) {
+        arrow = getArrow(bearings[currentPointIndex], bearings[currentPointIndex + 2]);
+      }
+    }
+
+    const prevPoint = currentRegion;
+    const nextPoint = routes[currentPointIndex + 1];
+
+    const distanceToNextPoint = getDistance(prevPoint, nextPoint);
+
+    if (distanceToNextPoint > 20) arrow = "straight";
+
     setRotation(getRotation(arrow));
   };
 
@@ -42,3 +63,11 @@ export default function ARRouter() {
     />
   );
 }
+
+const styles = StyleSheet.create({
+  distanceText: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: "black",
+  },
+});

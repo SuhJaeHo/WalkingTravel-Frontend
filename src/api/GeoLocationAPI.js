@@ -34,7 +34,7 @@ export default function GeoLocationAPI(dispatch, updateMapRegion) {
           requestLocationPermission();
         }
       },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
 
     return GeoLocation.watchPosition(
@@ -63,8 +63,8 @@ export default function GeoLocationAPI(dispatch, updateMapRegion) {
       {
         enableHighAccuracy: true,
         timeout: 15000,
-        maximumAge: 10000,
-        distanceFilter: 3,
+        maximumAge: 0,
+        distanceFilter: 5,
       }
     );
   };
