@@ -48,7 +48,7 @@ export default function SearchLocationScreen({ navigation }) {
 
     return (
       <Pressable style={styles.searchListContainer} onPress={() => handlePressSearchList(structured_formatting.main_text, place_id, distance)}>
-        <Ionicons name={"location-sharp"} size={30} />
+        <Ionicons name={"location-sharp"} size={30} color={"blue"} />
         <Text>{structured_formatting.main_text}</Text>
         <Text>{distance}</Text>
       </Pressable>
@@ -59,37 +59,55 @@ export default function SearchLocationScreen({ navigation }) {
     return <View style={styles.seperatorLine}></View>;
   };
 
-  const renderListEmpty = () => {
-    return <Text>Not Search</Text>;
+  const EmptyComponent = () => {
+    return (
+      <View style={styles.noneSearchContainer}>
+        <Text>검색 결과 없음</Text>
+      </View>
+    );
   };
 
   return (
-    <View>
+    <View style={styles.container}>
       <View style={styles.searchInputContainer}>
         <Pressable onPress={handlePressBackButton}>
           <Ionicons name={"chevron-back-sharp"} size={30} color={"black"} />
         </Pressable>
-        <TextInput placeholder="Search Location" onChangeText={handleInputTextChange} value={inputText} />
+        <TextInput placeholder="장소 검색" onChangeText={handleInputTextChange} value={inputText} />
       </View>
       <FlatList
         data={searchResult}
         renderItem={renderItem}
         ItemSeparatorComponent={renderSeperator}
-        ListEmptyComponent={renderListEmpty}
+        ListEmptyComponent={<EmptyComponent />}
         keyExtractor={item => item.place_id}
+        contentContainerStyle={{ flexGrow: 1 }}
       />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   searchInputContainer: {
     flexDirection: "row",
     alignItems: "center",
+    borderBottomColor: "#e0e0e0",
+    borderBottomWidth: 2,
   },
   searchListContainer: {
     flexDirection: "row",
+    alignItems: "center",
     justifyContent: "space-between",
+    height: 100,
+    paddingLeft: 5,
+  },
+  noneSearchContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   seperatorLine: {
     borderBottomWidth: 1,
