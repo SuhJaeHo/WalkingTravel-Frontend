@@ -73,6 +73,7 @@ export default function GoogleMap() {
       if (nearPointIndex !== 0) {
         if (
           Math.abs(nearPointBearing - bearingFromNearPoint) < 60 ||
+          isNaN(Math.abs(nearPointBearing - bearingFromNearPoint)) ||
           Math.abs(bearingFromBeforeRegion - destination.routes[nearPointIndex]) -
             Math.abs(bearingFromBeforeRegion - destination.routes[nearPointIndex - 1]) <
             0
@@ -104,7 +105,15 @@ export default function GoogleMap() {
   return (
     <>
       {tilt > 7 && destination.isGuideStart === true ? (
-        <ARRouter />
+        <>
+          <ARRouter />
+          <MapView style={styles.arOpenMap} region={currentRegion} showsUserLocation={true} showsMyLocationButton={true}>
+            {destination.photoURL !== "" && <Marker coordinate={destination.region} onPress={() => handlePressMarker()} />}
+            {destination.isGuideStart && (
+              <Polyline coordinates={[...destination.routes]} strokeColor="blue" strokeWidth={6} lineDashPattern={[2, 2]} />
+            )}
+          </MapView>
+        </>
       ) : (
         <MapView
           style={isBottomSheetOpen ? styles.sheetOpenMap : styles.map}
@@ -132,5 +141,11 @@ const styles = StyleSheet.create({
     height: Dimensions.get("screen").height * 1,
     position: "absolute",
     bottom: Dimensions.get("screen").height * 0.2,
+  },
+  arOpenMap: {
+    width: Dimensions.get("screen").width * 1,
+    height: Dimensions.get("screen").height * 0.3,
+    position: "absolute",
+    top: Dimensions.get("screen").height * 0.65,
   },
 });

@@ -27,17 +27,23 @@ export default function ViewDestination() {
     return (
       <View style={styles.container}>
         {destination.photoURL && <Image source={{ uri: destination.photoURL }} style={styles.imageContainer} />}
-        <Text>{destination.placeName}</Text>
-        <Text>{destination.distance}</Text>
-        {!destination.isGuideStart ? (
-          <Pressable style={styles.guideBtn} onPress={handlePressGuideButton}>
-            <Text style={styles.guideText}>시작</Text>
-          </Pressable>
-        ) : (
-          <Pressable style={styles.guideBtn} onPress={handlePressGuideButton}>
-            <Text style={styles.guideText}>종료</Text>
-          </Pressable>
-        )}
+        <View style={styles.contentContainer}>
+          <View style={styles.infoTextContatiner}>
+            <Text style={styles.infoText}>{destination.placeName}</Text>
+            <Text style={styles.infoText}>{destination.distance}</Text>
+          </View>
+          <View>
+            {!destination.isGuideStart ? (
+              <Pressable style={styles.guideBtn} onPress={handlePressGuideButton}>
+                <Text style={styles.guideText}>시작</Text>
+              </Pressable>
+            ) : (
+              <Pressable style={styles.guideBtn} onPress={handlePressGuideButton}>
+                <Text style={styles.guideText}>종료</Text>
+              </Pressable>
+            )}
+          </View>
+        </View>
       </View>
     );
   };
@@ -76,13 +82,24 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: "100%",
-    height: "50%",
+    height: "60%",
+  },
+  contentContainer: {
+    flexDirection: "row",
+    padding: 10,
+    justifyContent: "space-between",
+  },
+  infoText: {
+    fontSize: 28,
+    color: "black",
   },
   guideBtn: {
     width: Dimensions.get("screen").width * 0.2,
     height: Dimensions.get("screen").height * 0.1,
     borderRadius: Dimensions.get("screen").height * 0.05,
     backgroundColor: "blue",
+    justifyContent: "center",
+    alignItems: "center",
   },
   guideText: {
     color: "#fff",
