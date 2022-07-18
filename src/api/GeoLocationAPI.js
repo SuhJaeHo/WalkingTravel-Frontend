@@ -47,8 +47,8 @@ export default function GeoLocationAPI(dispatch, updateMapRegion) {
               currentRegion: {
                 latitude: position.coords.latitude,
                 longitude: position.coords.longitude,
-                latitudeDelta: 0.015,
-                longitudeDelta: 0.0121,
+                latitudeDelta: 0.004,
+                longitudeDelta: 0.003,
               },
               placeName,
             })
