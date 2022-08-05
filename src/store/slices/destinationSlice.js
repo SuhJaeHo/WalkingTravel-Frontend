@@ -1,46 +1,47 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  destination: {
-    placeName: "Location Search",
-    region: {},
-    distance: 0,
-    photoURL: "",
-    routes: [],
-    bearings: [],
-    currentPointIndex: 0,
-    isGuideStart: false,
-  },
+  address: "장소 검색",
+  region: {},
+  photoURL: "",
+  distance: 0,
+  routes: [],
+  conformedRoutes: [],
+  conformedBearings: [],
+  currentRouteIndex: 0,
+  isGuideStart: false,
 };
 
 const destinationSlice = createSlice({
   name: "destination",
   initialState,
   reducers: {
-    updateDestination(state, action) {
-      const { placeName, region, photoURL, distance } = action.payload;
+    chooseDestination(state, action) {
+      const { address, region, photoURL, distance } = action.payload;
 
-      state.destination.placeName = placeName;
-      state.destination.region = region;
-      state.destination.photoURL = photoURL;
-      state.destination.distance = distance;
+      state.address = address;
+      state.region = region;
+      state.photoURL = photoURL;
+      state.distance = distance;
+      state.isGuideStart = false;
     },
     startGuide(state, action) {
-      const { routes, bearings } = action.payload;
+      const { routes, conformedRoutes, conformedBearings } = action.payload;
 
-      state.destination.routes = routes;
-      state.destination.bearings = bearings;
-      state.destination.isGuideStart = true;
+      state.routes = routes;
+      state.conformedRoutes = conformedRoutes;
+      state.conformedBearings = conformedBearings;
+      state.isGuideStart = true;
     },
     endGuide(state) {
-      state.destination.isGuideStart = false;
+      state.isGuideStart = false;
     },
-    updateCurrentPointIndex(state, action) {
-      state.destination.currentPointIndex = action.payload;
+    updateCurrentRouteIndex(state, action) {
+      state.currentRouteIndex = action.payload;
     },
   },
 });
 
-export const { updateDestination, startGuide, endGuide, updateCurrentPointIndex } = destinationSlice.actions;
+export const { chooseDestination, startGuide, endGuide, updateCurrentRouteIndex } = destinationSlice.actions;
 
 export default destinationSlice.reducer;

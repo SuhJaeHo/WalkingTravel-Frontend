@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, Image } from "react-native";
 
 import { GoogleSignin, GoogleSigninButton, statusCodes } from "@react-native-google-signin/google-signin";
 import auth from "@react-native-firebase/auth";
@@ -10,17 +10,15 @@ import Config from "react-native-config";
 import { useDispatch } from "react-redux";
 import { addUid } from "../../store/slices/userSlice";
 
+import CheckPermissionAPI from "../../api/CheckPermissionAPI";
+
 export default function LoginScreen({ navigation }) {
   const dispatch = useDispatch();
 
   useEffect(() => {
     googleSiginConfigure();
 
-    if (checkIsLoggedIn) {
-      navigation.navigate("Main");
-    }
-
-    if (!checkIsLoggedIn) {
+    if (!checkIsLoggedIn()) {
       auth().onAuthStateChanged(onAuthStateChanged);
     }
   }, []);
@@ -35,17 +33,21 @@ export default function LoginScreen({ navigation }) {
     if (user) {
       const idToken = await user.getIdToken();
 
-      const res = await axios.get(`${Config.SERVER_URL}/login`, {
-        headers: {
-          Authorization: `Bearer ${idToken}`,
-        },
-      });
+      try {
+        const res = await axios.get(`${Config.SERVER_URL}/login`, {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+        });
 
-      if (res.data.message === "success") {
-        const uid = auth().currentUser.uid;
-        dispatch(addUid(uid));
+        if (res.data.message === "success") {
+          const uid = auth().currentUser.uid;
+          dispatch(addUid(uid));
 
-        navigation.navigate("Main");
+          navigation.navigate("Permission");
+        }
+      } catch (error) {
+        console.log(error);
       }
     }
   };
@@ -55,7 +57,10 @@ export default function LoginScreen({ navigation }) {
       const uid = auth().currentUser.uid;
       dispatch(addUid(uid));
 
-      navigation.navigate("Main");
+      CheckPermissionAPI().then(isPermission => {
+        isPermission ? navigation.navigate("Main") : navigation.navigate("Permission");
+      });
+
       return true;
     }
 
@@ -72,19 +77,20 @@ export default function LoginScreen({ navigation }) {
       return auth().signInWithCredential(googleCredential);
     } catch (error) {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-        console.log(error.code);
+        console.log(error);
       } else if (error.code === statusCodes.IN_PROGRESS) {
-        console.log(error.code);
+        console.log(error);
       } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        console.log(error.code);
+        console.log(error);
       } else {
-        console.log(error.code);
+        console.log(error);
       }
     }
   };
 
   return (
     <View style={styles.container}>
+      <Image source={require("../../assets/splash.png")} />
       <GoogleSigninButton onPress={handleGoogleLoginButtonPress} />
     </View>
   );

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, Dimensions } from "react-native";
 
 import MapView, { Marker, Polyline } from "react-native-maps";
@@ -10,16 +10,19 @@ import ARRouter from "../navigation/arRouter";
 import { accelerometer, setUpdateIntervalForType, SensorTypes } from "react-native-sensors";
 
 import { useDispatch, useSelector } from "react-redux";
-import { updateCurrentPointIndex } from "../store/slices/destinationSlice";
-import { updateSheetState } from "../store/slices/bottomSheetSlice";
+import { trackCompassHeading } from "../store/slices/userSlice";
+import { updateCurrentRouteIndex } from "../store/slices/destinationSlice";
+import { openBottomSheet, closeBottomSheet } from "../store/slices/bottomSheetSlice";
 
-import { getNearPointIndex, getBearingFromNearPoint, getBearingFromBeforeRegion } from "../utils/utils";
+import { getDistance } from "../utils/distance";
+import { getNearRouteIndex } from "../utils/getNearRoute";
+
+import CompassHeading from "react-native-compass-heading";
 
 import { LogBox } from "react-native";
 
 export default function GoogleMap() {
   const [tilt, setTilt] = useState(0);
-  const [isMarkerPressed, setIsMarkerPressed] = useState(false);
   const [mapRegion, setMapRegion] = useState({
     latitude: 37.497,
     longitude: 127.0254,
@@ -29,9 +32,13 @@ export default function GoogleMap() {
 
   const dispatch = useDispatch();
 
-  const beforeRegion = useSelector(state => state.user.beforeRegion);
   const currentRegion = useSelector(state => state.user.currentRegion);
-  const destination = useSelector(state => state.destination.destination);
+
+  const destinationRegion = useSelector(state => state.destination.region);
+  const destinationRoutes = useSelector(state => state.destination.routes);
+  const destinationConformedRoutes = useSelector(state => state.destination.conformedRoutes);
+  const currentRouteIndex = useSelector(state => state.destination.currentRouteIndex);
+  const isGuideStart = useSelector(state => state.destination.isGuideStart);
   const isBottomSheetOpen = useSelector(state => state.bottomSheet.isBottomSheetOpen);
 
   useEffect(() => {
@@ -47,84 +54,98 @@ export default function GoogleMap() {
   }, []);
 
   useEffect(() => {
-    const subscription = accelerometer.subscribe(({ y }) => {
+    const compass = CompassHeading;
+    let headingValue = null;
+
+    const accelerometerSubscription = accelerometer.subscribe(({ y }) => {
       if (y > 0) {
         if (Math.abs(tilt - y) > 7) {
           setTilt(y);
 
-          subscription.unsubscribe();
+          accelerometerSubscription.unsubscribe();
+        }
+
+        if (y > 7) {
+          if (headingValue) dispatch(trackCompassHeading(headingValue));
+        } else if (y > 2 && y < 7) {
+          compass.stop();
+        } else {
+          const degree_update_rate = 3;
+
+          compass.start(degree_update_rate, ({ heading }) => {
+            headingValue = heading;
+          });
         }
       }
     });
   }, [tilt]);
 
   useEffect(() => {
-    if (destination.routes.length !== 0) {
-      const nearPointIndex = getNearPointIndex({ latitude: currentRegion.latitude, longitude: currentRegion.longitude }, destination.routes);
+    if (isGuideStart) {
+      const nearRouteIndex = getNearRouteIndex({ latitude: currentRegion.latitude, longitude: currentRegion.longitude }, destinationConformedRoutes);
 
-      const nearPointRegion = destination.routes[nearPointIndex];
+      const distanceFromRouteToNextRoute = getDistance(destinationConformedRoutes[nearRouteIndex], destinationConformedRoutes[nearRouteIndex + 1]);
+      const distanceFromCurrentRegionToNextRoute = getDistance(currentRegion, destinationConformedRoutes[nearRouteIndex + 1]);
 
-      const bearingFromNearPoint = getBearingFromNearPoint(nearPointRegion, currentRegion);
+      if (!nearRouteIndex) dispatch(updateCurrentRouteIndex(nearRouteIndex));
 
-      const nearPointBearing = destination.bearings[nearPointIndex];
-
-      const bearingFromBeforeRegion = getBearingFromBeforeRegion(beforeRegion, currentRegion);
-
-      if (nearPointIndex !== 0) {
-        if (
-          Math.abs(nearPointBearing - bearingFromNearPoint) < 60 ||
-          isNaN(Math.abs(nearPointBearing - bearingFromNearPoint)) ||
-          Math.abs(bearingFromBeforeRegion - destination.routes[nearPointIndex]) -
-            Math.abs(bearingFromBeforeRegion - destination.routes[nearPointIndex - 1]) <
-            0
-        ) {
-          dispatch(updateCurrentPointIndex(nearPointIndex));
-        } else {
-          dispatch(updateCurrentPointIndex(nearPointIndex - 1));
-        }
+      if (nearRouteIndex && distanceFromRouteToNextRoute > distanceFromCurrentRegionToNextRoute) {
+        if (currentRouteIndex !== nearRouteIndex) dispatch(updateCurrentRouteIndex(nearRouteIndex));
       } else {
-        dispatch(updateCurrentPointIndex(nearPointIndex));
+        if (currentRouteIndex !== nearRouteIndex - 1) dispatch(updateCurrentRouteIndex(nearRouteIndex - 1));
       }
     }
-  }, [currentRegion]);
+  }, [isGuideStart]);
+
+  useEffect(() => {
+    if (Object.keys(destinationRegion).length) {
+      setMapRegion({
+        ...mapRegion,
+        latitude: destinationRegion.latitude,
+        longitude: destinationRegion.longitude,
+      });
+    }
+  }, [destinationRegion]);
 
   const handlePressMarker = () => {
-    setIsMarkerPressed(true);
-    dispatch(updateSheetState());
+    setMapRegion({
+      ...mapRegion,
+      latitude: destinationRegion.latitude,
+      longitude: destinationRegion.longitude,
+    });
+
+    if (!isBottomSheetOpen) dispatch(openBottomSheet());
   };
 
   const handlePressMapView = () => {
-    if (isBottomSheetOpen) {
-      setIsMarkerPressed(false);
-      dispatch(updateSheetState());
-    }
+    isBottomSheetOpen ? dispatch(closeBottomSheet()) : dispatch(openBottomSheet());
   };
 
-  const handleDragMap = reg => setMapRegion(reg);
+  const handleDragMap = (reg, gesture) => {
+    if (gesture.isGesture) setMapRegion(reg);
+  };
 
   return (
     <>
-      {tilt > 7 && destination.isGuideStart === true ? (
+      {tilt > 7 && isGuideStart === true ? (
         <>
           <ARRouter />
           <MapView style={styles.arOpenMap} region={currentRegion} showsUserLocation={true} showsMyLocationButton={true}>
-            {destination.photoURL !== "" && <Marker coordinate={destination.region} onPress={() => handlePressMarker()} />}
-            {destination.isGuideStart && (
-              <Polyline coordinates={[...destination.routes]} strokeColor="blue" strokeWidth={6} lineDashPattern={[2, 2]} />
-            )}
+            <Marker coordinate={destinationRegion} />
+            <Polyline coordinates={[...destinationRoutes]} strokeColor="blue" strokeWidth={6} lineDashPattern={[2, 2]} />
           </MapView>
         </>
       ) : (
         <MapView
           style={isBottomSheetOpen ? styles.sheetOpenMap : styles.map}
-          region={isMarkerPressed ? destination.region : mapRegion}
+          region={mapRegion}
           showsUserLocation={true}
           showsMyLocationButton={true}
-          onRegionChangeComplete={reg => handleDragMap(reg)}
+          onRegionChangeComplete={(reg, gesture) => handleDragMap(reg, gesture)}
           onPress={() => handlePressMapView()}
         >
-          {destination.photoURL !== "" && <Marker coordinate={destination.region} onPress={() => handlePressMarker()} />}
-          {destination.isGuideStart && <Polyline coordinates={[...destination.routes]} strokeColor="blue" strokeWidth={6} lineDashPattern={[2, 2]} />}
+          {Object.keys(destinationRegion).length !== 0 && <Marker coordinate={destinationRegion} onPress={() => handlePressMarker()} />}
+          {isGuideStart && <Polyline coordinates={[...destinationRoutes]} strokeColor="blue" strokeWidth={6} lineDashPattern={[2, 2]} />}
         </MapView>
       )}
     </>
