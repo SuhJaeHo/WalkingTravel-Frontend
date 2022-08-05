@@ -13,7 +13,7 @@ export default function Splash({ navigation }) {
         clearTimeout(splashTime);
       }, 2000);
     } catch (error) {
-      console.warn(error);
+      console.log(error);
     }
   }, []);
 }

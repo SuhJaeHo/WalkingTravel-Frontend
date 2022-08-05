@@ -1,16 +1,19 @@
 import React, { useState } from "react";
 import { StyleSheet, View, Text, TextInput, Pressable, FlatList } from "react-native";
 
-import Ionicons from "react-native-vector-icons/Ionicons";
+import EmptySearchResult from "../../components/EmptySearchResult";
+import SearchResultSeperator from "../../components/SearchResultSeperator";
 
 import { useSelector, useDispatch } from "react-redux";
-import { updateDestination } from "../../store/slices/destinationSlice";
-import { updateSheetState } from "../../store/slices/bottomSheetSlice";
+import { chooseDestination } from "../../store/slices/destinationSlice";
+import { openBottomSheet } from "../../store/slices/bottomSheetSlice";
 
 import PlaceAutoCompleteAPI from "../../api/PlaceAutoCompleteAPI";
 import PlaceDetailsAPI from "../../api/PlaceDetailsAPI";
 
-import { getKilometers } from "../../utils/utils";
+import { getKilometersFromMeters } from "../../utils/distance";
+
+import Ionicons from "react-native-vector-icons/Ionicons";
 
 export default function SearchLocationScreen({ navigation }) {
   const [inputText, setInputText] = useState("");
@@ -19,19 +22,20 @@ export default function SearchLocationScreen({ navigation }) {
   const dispatch = useDispatch();
   const currentRegion = useSelector(state => state.user.currentRegion);
 
-  const handleInputTextChange = async text => {
-    setInputText(text);
+  const handleInputTextChange = async inputText => {
+    setInputText(inputText);
 
-    const searchResult = await PlaceAutoCompleteAPI(text, currentRegion);
-    setSearchResult(searchResult.predictions);
+    const { message, data } = await PlaceAutoCompleteAPI(inputText, currentRegion);
+
+    if (message === "success") setSearchResult(data.predictions);
   };
 
-  const handlePressSearchList = async (placeName, placeId, distance) => {
-    const { message, region, photoURL } = await PlaceDetailsAPI(placeId);
+  const handlePressList = async (address, id, distance) => {
+    const { message, region, photoURL } = await PlaceDetailsAPI(id);
 
     if (message === "success") {
-      dispatch(updateDestination({ placeName, region, photoURL, distance }));
-      dispatch(updateSheetState());
+      dispatch(chooseDestination({ address, region, photoURL, distance }));
+      dispatch(openBottomSheet());
 
       navigation.navigate("Main");
     }
@@ -41,29 +45,17 @@ export default function SearchLocationScreen({ navigation }) {
     navigation.navigate("Main");
   };
 
-  const renderItem = ({ item }) => {
+  const searchList = ({ item }) => {
     const { structured_formatting, distance_meters, place_id } = item;
 
-    const distance = getKilometers(distance_meters);
+    const distance = getKilometersFromMeters(distance_meters);
 
     return (
-      <Pressable style={styles.searchListContainer} onPress={() => handlePressSearchList(structured_formatting.main_text, place_id, distance)}>
+      <Pressable style={styles.searchListContainer} onPress={() => handlePressList(structured_formatting.main_text, place_id, distance)}>
         <Ionicons name={"location-sharp"} size={30} color={"blue"} />
         <Text>{structured_formatting.main_text}</Text>
         <Text>{distance}</Text>
       </Pressable>
-    );
-  };
-
-  const renderSeperator = () => {
-    return <View style={styles.seperatorLine}></View>;
-  };
-
-  const EmptyComponent = () => {
-    return (
-      <View style={styles.noneSearchContainer}>
-        <Text>검색 결과 없음</Text>
-      </View>
     );
   };
 
@@ -77,9 +69,9 @@ export default function SearchLocationScreen({ navigation }) {
       </View>
       <FlatList
         data={searchResult}
-        renderItem={renderItem}
-        ItemSeparatorComponent={renderSeperator}
-        ListEmptyComponent={<EmptyComponent />}
+        renderItem={searchList}
+        ItemSeparatorComponent={SearchResultSeperator}
+        ListEmptyComponent={<EmptySearchResult />}
         keyExtractor={item => item.place_id}
         contentContainerStyle={{ flexGrow: 1 }}
       />
@@ -103,14 +95,5 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     height: 100,
     paddingLeft: 5,
-  },
-  noneSearchContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  seperatorLine: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
   },
 });
