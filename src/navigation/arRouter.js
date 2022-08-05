@@ -1,54 +1,46 @@
 import React, { useState } from "react";
 
-import { StyleSheet } from "react-native";
-
 import { ViroARScene, ViroImage, ViroAnimations } from "@viro-community/react-viro";
 import { ViroARSceneNavigator } from "@viro-community/react-viro";
 
 import { useSelector } from "react-redux";
 
-import { getArrow, getRotation, getDistance } from "../utils/utils";
+import { getArrowByBearing, getArrowByCompassHeading, getRotation } from "../utils/arArrow";
+import { getDistance } from "../utils/distance";
 
 const GuideScene = () => {
   const [rotation, setRotation] = useState([0, 0, 0]);
   const [position, setPosition] = useState([0, 0, -5]);
   const [animation, setAnimation] = useState("moveRightLeft");
 
-  const routes = useSelector(state => state.destination.destination.routes);
-  const bearings = useSelector(state => state.destination.destination.bearings);
-  const currentPointIndex = useSelector(state => state.destination.destination.currentPointIndex);
+  const conformedRoutes = useSelector(state => state.destination.conformedRoutes);
+  const conformedBearings = useSelector(state => state.destination.conformedBearings);
+  const currentRouteIndex = useSelector(state => state.destination.currentRouteIndex);
+
   const currentRegion = useSelector(state => state.user.currentRegion);
+  const compassHeading = useSelector(state => state.user.compassHeading);
 
   const rotateArrow = () => {
-    let arrow = getArrow(bearings[currentPointIndex], bearings[currentPointIndex + 1]);
+    const distanceToNextRoute = getDistance(currentRegion, conformedRoutes[currentRouteIndex + 1]);
 
-    if (bearings[currentPointIndex + 2]) {
-      if (
-        bearings[currentPointIndex] === bearings[currentPointIndex + 1] &&
-        getDistance(routes[currentPointIndex + 1], routes[currentPointIndex + 2]) < 10
-      ) {
-        arrow = getArrow(bearings[currentPointIndex], bearings[currentPointIndex + 2]);
-      }
-    }
-
-    if (currentPointIndex !== routes.length - 1) {
-      const prevPoint = currentRegion;
-      const nextPoint = routes[currentPointIndex + 1];
-
-      const distanceToNextPoint = getDistance(prevPoint, nextPoint);
-
-      if (distanceToNextPoint > 20) arrow = "straight";
-    }
-
-    if (arrow === "right") setAnimation("moveLeftRight");
-
-    if (arrow === "left") setAnimation("moveRightLeft");
-
-    if (arrow === "straight") {
+    if (distanceToNextRoute > 30) {
       setPosition([0, -1, -5]);
       setAnimation("moveNone");
+      setRotation(getRotation(arrow));
+
+      return;
     }
 
+    if (!currentRouteIndex) {
+      const arrow = getArrowByCompassHeading(compassHeading, conformedBearings[currentRouteIndex]);
+      setRotation(getRotation(arrow));
+
+      return;
+    }
+
+    const arrow = getArrowByBearing(conformedBearings[currentRouteIndex], conformedBearings[currentRouteIndex + 1]);
+
+    if (arrow === "right") setAnimation("moveLeftRight");
     setRotation(getRotation(arrow));
   };
 
@@ -84,7 +76,7 @@ const GuideScene = () => {
 
   return (
     <ViroARScene>
-      {currentPointIndex === routes.length - 1 ? (
+      {currentRouteIndex === conformedRoutes.length - 1 ? (
         <ViroImage
           source={require("../assets/arrivePing.png")}
           width={2}
@@ -99,7 +91,7 @@ const GuideScene = () => {
           height={2}
           position={position}
           rotation={rotation}
-          onLoadEnd={() => rotateArrow()}
+          onLoadEnd={rotateArrow}
           animation={{ name: animation, loop: true, run: true, interruptible: true }}
         />
       )}
@@ -117,11 +109,3 @@ export default function ARRouter() {
     />
   );
 }
-
-const styles = StyleSheet.create({
-  distanceText: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: "black",
-  },
-});

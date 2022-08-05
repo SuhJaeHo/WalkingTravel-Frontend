@@ -7,9 +7,9 @@ export default async function GeocodeAPI(latitude, longitude) {
       `https://maps.googleapis.com/maps/api/geocode/json?language=ko&latlng=${latitude}%2C${longitude}&key=${Config.GOOGLE_API_KEY}`
     );
 
-    const placeName = response.data.results[0].formatted_address;
+    const address = response.data.results[0].formatted_address;
 
-    return placeName;
+    return address;
   } catch (error) {
     console.log(error);
   }

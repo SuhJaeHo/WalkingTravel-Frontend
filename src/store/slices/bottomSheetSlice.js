@@ -8,12 +8,15 @@ const bottomSheetSlice = createSlice({
   name: "bottomSheet",
   initialState,
   reducers: {
-    updateSheetState(state) {
-      state.isBottomSheetOpen = !state.isBottomSheetOpen;
+    openBottomSheet(state) {
+      state.isBottomSheetOpen = true;
+    },
+    closeBottomSheet(state) {
+      state.isBottomSheetOpen = false;
     },
   },
 });
 
-export const { updateSheetState } = bottomSheetSlice.actions;
+export const { openBottomSheet, closeBottomSheet } = bottomSheetSlice.actions;
 
 export default bottomSheetSlice.reducer;

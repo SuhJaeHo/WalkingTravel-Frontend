@@ -8,13 +8,7 @@ const initialState = {
     latitudeDelta: 0.015,
     longitudeDelta: 0.0121,
   },
-  beforeRegion: {
-    latitude: 37.497,
-    longitude: 127.0254,
-    latitudeDelta: 0.015,
-    longitudeDelta: 0.0121,
-  },
-  placeName: "",
+  compassHeading: 0,
 };
 
 const userSlice = createSlice({
@@ -24,17 +18,17 @@ const userSlice = createSlice({
     addUid(state, action) {
       state.uid = action.payload;
     },
-    updateCurrentPoint(state, action) {
-      const { currentRegion, placeName } = action.payload;
-
-      state.beforeRegion = state.currentRegion;
+    trackCurrentRegion(state, action) {
+      const { currentRegion } = action.payload;
 
       state.currentRegion = currentRegion;
-      state.placeName = placeName;
+    },
+    trackCompassHeading(state, action) {
+      state.compassHeading = action.payload;
     },
   },
 });
 
-export const { addUid, updateCurrentPoint } = userSlice.actions;
+export const { addUid, trackCurrentRegion, trackCompassHeading } = userSlice.actions;
 
 export default userSlice.reducer;
