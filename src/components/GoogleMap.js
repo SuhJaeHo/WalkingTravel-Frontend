@@ -91,7 +91,9 @@ export default function GoogleMap() {
 
       if (nearRouteIndex && distanceFromRouteToNextRoute > distanceFromCurrentRegionToNextRoute) {
         if (currentRouteIndex !== nearRouteIndex) dispatch(updateCurrentRouteIndex(nearRouteIndex));
-      } else {
+      }
+
+      if (nearRouteIndex && distanceFromRouteToNextRoute < distanceFromCurrentRegionToNextRoute) {
         if (currentRouteIndex !== nearRouteIndex - 1) dispatch(updateCurrentRouteIndex(nearRouteIndex - 1));
       }
     }
