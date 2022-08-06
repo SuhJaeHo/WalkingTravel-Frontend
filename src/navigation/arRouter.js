@@ -23,16 +23,18 @@ const GuideScene = () => {
   const rotateArrow = () => {
     const distanceToNextRoute = getDistance(currentRegion, conformedRoutes[currentRouteIndex + 1]);
 
-    if (distanceToNextRoute > 30) {
-      setPosition([0, -1, -5]);
-      setAnimation("moveNone");
+    if (!currentRouteIndex) {
+      const arrow = getArrowByCompassHeading(compassHeading, conformedBearings[currentRouteIndex]);
       setRotation(getRotation(arrow));
 
       return;
     }
 
-    if (!currentRouteIndex) {
-      const arrow = getArrowByCompassHeading(compassHeading, conformedBearings[currentRouteIndex]);
+    if (distanceToNextRoute > 30) {
+      const arrow = "straight";
+
+      setPosition([0, -1, -5]);
+      setAnimation("moveNone");
       setRotation(getRotation(arrow));
 
       return;
@@ -91,7 +93,7 @@ const GuideScene = () => {
           height={2}
           position={position}
           rotation={rotation}
-          onLoadEnd={rotateArrow}
+          onLoadEnd={() => rotateArrow()}
           animation={{ name: animation, loop: true, run: true, interruptible: true }}
         />
       )}
