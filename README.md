@@ -1,4 +1,4 @@
-# 🚶🏻 WalkingTravel
+## 🚶🏻 WalkingTravel
 
 <p align="center">
   <img width="600" alt="Logo" src="https://user-images.githubusercontent.com/68631561/183117506-0bf47293-732e-4a3f-9f42-fc558a6d527a.png">
@@ -12,7 +12,25 @@ AR 모드를 제공하는 길찾기 어플리케이션입니다.
 
 <br />
 
-# 💡 Motivation
+## 📱 Play Store
+
+https://play.google.com/store/apps/details?id=com.walkingtravel
+
+<br />
+
+## 📚 Contents
+
+- 💡 [Motivation](#-motivation)
+- 🌄 [Features](#-features)
+- 🗓 [Schedule](#-schedule)
+- 🛠 [Tech Stack](#-tech-stack)
+- 🎬 [Getting Started](#-getting-started)
+- 📉 [Difficulties](#-difficulties)
+- 📝 [Retrospect](#-retrospect)
+
+<br />
+
+## 💡 Motivation
 
 낯선 장소로 여행을 떠나면 핸드폰에서 지도를 켜서 길 찾기를 합니다.
 하지만 지도에 목적지까지의 경로가 표시되어도 여러 갈림길이 있을 때 어느 방향으로 가야 하는지 헷갈리는 경우가 많았습니다.
@@ -21,7 +39,7 @@ AR 모드를 제공하는 길찾기 어플리케이션입니다.
 
 <br />
 
-# 🌄 Features
+## 🌄 Features
 
 |                                                                  실행화면                                                                  |                                   내용                                    |
 | :----------------------------------------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------: |
@@ -33,19 +51,12 @@ AR 모드를 제공하는 길찾기 어플리케이션입니다.
 
 <br />
 
-# 📱 Link
-
-### Play Store
-
-https://play.google.com/store/apps/details?id=com.walkingtravel
-
-<br />
-
-# 🗓 Schedule
+## 🗓 Schedule
 
 ### 2022/06/27 ~ 2022/07/02
 
 - 아이디어 선정 및 기술 스택 검증
+- 목업 및 칸반 작성
 
 ### 2022/07/03 ~ 2022/07/15
 
@@ -53,7 +64,7 @@ https://play.google.com/store/apps/details?id=com.walkingtravel
 
 <br />
 
-# 🛠 Tech Stack
+## 🛠 Tech Stack
 
 ### Frontend
 
@@ -71,7 +82,7 @@ https://play.google.com/store/apps/details?id=com.walkingtravel
 
 <br />
 
-# 🎬 Getting Started
+## 🎬 Getting Started
 
 ### Client
 
@@ -91,7 +102,7 @@ npm start
 
 <br />
 
-# 🔐 env
+## 🔐 env
 
 ### Client
 
@@ -111,7 +122,7 @@ MONGODB_URL=<YOUR_MONGODB_URL>
 
 <br />
 
-# 📉 Difficulties
+## 📉 Difficulties
 
 ### 1. api 데이터의 불충분성
 
@@ -134,7 +145,7 @@ api로부터 받은 경로 데이터를 다듬는 과정에서 의도하지 않�
 
 <br />
 
-# 📝 Retrospect
+## 📝 Retrospect
 
 프로젝트를 기획할 때 기술 조사를 하면서 핵심적인 기능을 어떻게 구현할 수 있을까에 대해서 생각해보면서 과연 할 수 있을까? 라는 의구심이 들면서도 한번 부딪혀보자 라는 생각을 가지고 프로젝트에 임하였던 것 같습니다.
 
