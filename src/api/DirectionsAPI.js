@@ -4,8 +4,8 @@ import Config from "react-native-config";
 import {
   getBearingByRegions,
   getBearingsFromRoutes,
-  getUnneccessaryRoute,
-  removeUnneccessaryRoute,
+  getUnneccessaryRouteIndexArray,
+  getConformedRoutes,
   checkNextIndexIsNotEmpty,
 } from "../utils/destinationRoutes";
 
@@ -50,7 +50,8 @@ export default async function DirectionsAPI(currentRegion, currentAddress, desti
 
     const bearings = getBearingsFromRoutes(routes, getBearingByRegions, checkNextIndexIsNotEmpty);
 
-    const { conformedRoutes, conformedBearings } = getUnneccessaryRoute(routes, bearings, removeUnneccessaryRoute, getDistance);
+    const unNeccessaryRouteIndexArray = getUnneccessaryRouteIndexArray(routes, bearings, getDistance);
+    const { conformedRoutes, conformedBearings } = getConformedRoutes(routes, bearings, unNeccessaryRouteIndexArray);
 
     return { routes, conformedRoutes, conformedBearings };
   } catch (error) {

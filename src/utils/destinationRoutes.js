@@ -22,16 +22,16 @@ export const getBearingsFromRoutes = (routes, getBearingByRegions, checkNextInde
   return conformedRoutes.map((route, index) => getBearingByRegions(route, routes[index + 1]));
 };
 
-export const getUnneccessaryRoute = (routes, bearings, removeUnneccessaryRoute, getDistance) => {
-  const removeRouteIndexArray = [];
+export const getUnneccessaryRouteIndexArray = (routes, bearings, getDistance) => {
+  const unNeccessaryRouteIndexArray = [];
 
   const conformedRoutes = routes.filter((route, index, routes) => checkNextIndexIsNotEmpty(index, routes));
 
   conformedRoutes.forEach((route, index) => {
-    if (isUnneccessaryRoute(route, index, routes, bearings, getDistance)) removeRouteIndexArray.push(index + 1);
+    if (isUnneccessaryRoute(route, index, routes, bearings, getDistance)) unNeccessaryRouteIndexArray.push(index + 1);
   });
 
-  return removeUnneccessaryRoute(routes, bearings, removeRouteIndexArray);
+  return unNeccessaryRouteIndexArray;
 };
 
 export const checkNextIndexIsNotEmpty = (index, routes) => {
@@ -45,13 +45,13 @@ export const isUnneccessaryRoute = (route, index, routes, bearings, getDistance)
   if (distanceToNextPoint < 20 && (bearingGap > 330 || bearingGap < 30)) return true;
 };
 
-export const removeUnneccessaryRoute = (routes, bearings, removeIndexArray) => {
-  const conformedRoutes = routes.filter((route, index) => checkIsNotRemoveIndex(removeIndexArray, index));
-  const conformedBearings = bearings.filter((route, index) => checkIsNotRemoveIndex(removeIndexArray, index));
+export const getConformedRoutes = (routes, bearings, unNeccessaryRouteIndexArray) => {
+  const conformedRoutes = routes.filter((route, index) => checkIsNotUnNeccessaryIndex(unNeccessaryRouteIndexArray, index));
+  const conformedBearings = bearings.filter((route, index) => checkIsNotUnNeccessaryIndex(unNeccessaryRouteIndexArray, index));
 
   return { conformedRoutes, conformedBearings };
 };
 
-export const checkIsNotRemoveIndex = (removeIndexArray, index) => {
+export const checkIsNotUnNeccessaryIndex = (removeIndexArray, index) => {
   if (!removeIndexArray.includes(index)) return true;
 };
